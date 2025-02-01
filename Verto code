@@ -1,8 +1,7 @@
 import streamlit as st
-import google.generativeai as genai
-import os
+import google.generativeai as genai 
 
-# Set up the model configuration
+# Set up the model
 generation_config = {
     "temperature": 0.2,
     "top_p": 0.8,
@@ -10,49 +9,40 @@ generation_config = {
     "max_output_tokens": 8192,
 }
 
-# Set up your API key securely (replace this with your actual method of loading keys)
-api_key = os.getenv('API_KEY')  # Use an environment variable for security
-if api_key:
-    genai.configure(api_key=api_key)
-
-# Set up the model
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
 )
+# Set up your API key
+genai.configure(api_key="API_KEY")
 
 def translate_text(text, target_language):
-    try:
-        prompt = f"Translate the following text to {target_language}: {text}"
-        response = model.generate_content(prompt)
-        return response.text if response.text else "Translation error"
-    except Exception as e:
-        return f"Error: {str(e)}"
+    prompt = f"Translate the following text to {target_language}: {text}"
+    
+    response = model.generate_content(prompt)
+    
+    return response.text if response.text else "Translation error"
 
 # Streamlit UI
 st.title("Verto Ai")
 st.write("Translate text into different languages instantly!")
 
-# Input fields for translation
+# Input fields
 text = st.text_area("Enter text to translate:")
-languages = [
-    "French", "Spanish", "German", "Italian", "Portuguese",
-    "Chinese", "Japanese", "Hindi", "Arabic", "Russian"
-]
-target_lang = st.selectbox("Select Target Language", languages)
+target_lang = st.text_input("Target Language (e.g., French)")
 
-# Translation button
 if st.button("Translate"):
-    if text:
-        with st.spinner("Translating..."):
-            translated_text = translate_text(text, target_lang)
+    if text and target_lang:
+        translated_text = translate_text(text, target_lang)
         st.subheader("Translation:")
         st.write(translated_text)
     else:
-        st.warning("Please enter text to translate.")
+        st.warning("Please enter both text and target language.")
 
-# Example usage for debugging or testing
+# Example usage
 source_text = "Hello, how are you?"
 target_lang = "French"
 
+translated_text = translate_text(source_text, target_lang)
+print(f"Translated Text ({target_lang}): {translated_text}")
 
